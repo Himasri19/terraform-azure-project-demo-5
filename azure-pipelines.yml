@@ -7,9 +7,14 @@ pool:
 steps:
 - checkout: self
 
-- task: TerraformInstaller@1
-  inputs:
-    terraformVersion: 'latest'
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y wget unzip
+    wget https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip
+    unzip terraform_1.8.5_linux_amd64.zip
+    sudo mv terraform /usr/local/bin/
+    terraform version
+  displayName: 'Install Terraform'
 
 - task: AzureCLI@2
   displayName: 'Terraform Init'
@@ -46,14 +51,3 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       terraform plan
-
-# Uncomment later after testing
-
-# - task: AzureCLI@2
-#   displayName: 'Terraform Apply'
-#   inputs:
-#     azureSubscription: 'azure-terraform-sc'
-#     scriptType: bash
-#     scriptLocation: inlineScript
-#     inlineScript: |
-#       terraform apply -auto-approve
