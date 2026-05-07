@@ -5,41 +5,55 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: |
-    sudo apt-get update
-    sudo apt-get install -y wget unzip
-    wget https://releases.hashicorp.com/terraform/1.14.9/terraform_1.14.9_linux_amd64.zip
-    unzip terraform_1.14.9_linux_amd64.zip
-    sudo mv terraform /usr/local/bin/
-    terraform -version
-  displayName: 'Install Terraform'
+- checkout: self
 
-- script: |
-    terraform init -backend=false
+- task: TerraformInstaller@1
+  inputs:
+    terraformVersion: 'latest'
+
+- task: AzureCLI@2
   displayName: 'Terraform Init'
+  inputs:
+    azureSubscription: 'azure-terraform-sc'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      terraform init
 
-- script: |
-    terraform fmt -check
+- task: AzureCLI@2
   displayName: 'Terraform Format Check'
+  inputs:
+    azureSubscription: 'azure-terraform-sc'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      terraform fmt -check
 
-- script: |
-    terraform validate
+- task: AzureCLI@2
   displayName: 'Terraform Validate'
+  inputs:
+    azureSubscription: 'azure-terraform-sc'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      terraform validate
 
-- script: |
-    terraform plan
+- task: AzureCLI@2
   displayName: 'Terraform Plan'
-  env:
-    ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-    ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-    ARM_TENANT_ID: $(ARM_TENANT_ID)
-    ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+  inputs:
+    azureSubscription: 'azure-terraform-sc'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      terraform plan
 
-- script: |
-    terraform apply -auto-approve
-  displayName: 'Terraform Apply'
-  env:
-    ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-    ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-    ARM_TENANT_ID: $(ARM_TENANT_ID)
-    ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+# Uncomment later after testing
+
+# - task: AzureCLI@2
+#   displayName: 'Terraform Apply'
+#   inputs:
+#     azureSubscription: 'azure-terraform-sc'
+#     scriptType: bash
+#     scriptLocation: inlineScript
+#     inlineScript: |
+#       terraform apply -auto-approve
